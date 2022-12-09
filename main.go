@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"sync"
 	"time"
 
 	"github.com/robfig/cron"
@@ -26,6 +25,7 @@ func main() {
 	fmt.Println("完成读取配置")
 	// 周期性执行备份操作
 	c := cron.New()
+	command := "mongodump --uri mongodb+srv://" + config.UserName + ":" + config.Password + "@" + config.ClusterUrl + "/" + config.DBName
 	c.AddFunc(concreteTime, func() {
 		// 如果有dump文件夹，则先删除dump文件夹及其包含的所有子目录和所有文件
 		err := os.RemoveAll("./dump/")
@@ -34,7 +34,7 @@ func main() {
 		}
 		fmt.Println("执行备份")
 		time.Sleep(1 * time.Minute)
-		exec_shell()
+		exec_shell(command)
 	})
 	c.Start()
 
@@ -66,12 +66,13 @@ func (conf *Config) InitConfig(filePath string) *Config {
 
 // mongodump --uri mongodb+srv://firstUser:<PASSWORD>@cluster0.deeze6y.mongodb.net/<DATABASE>
 // mongodump --uri mongodb+srv://firstUser:qweasd123@cluster0.deeze6y.mongodb.net/market-cli-test
-func exec_shell() {
-	var once sync.Once
-	var command string
-	once.Do(func() {
-		command = "mongodump --uri mongodb+srv://" + config.UserName + ":" + config.Password + "@" + config.ClusterUrl + "/" + config.DBName
-	})
+func exec_shell(command string) {
+	// var once sync.Once
+	// var command string
+	// once.Do(func() {
+	// 	command = "mongodump --uri mongodb+srv://" + config.UserName + ":" + config.Password + "@" + config.ClusterUrl + "/" + config.DBName
+	// })
+
 	cmd := exec.Command("/bin/bash", "-c", command)
 	err := cmd.Run()
 	if err != nil {
