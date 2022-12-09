@@ -1,0 +1,4 @@
+userName: "firstUser"
+password: "qweasd123"
+clusterUrl: "cluster0.deeze6y.mongodb.net"
+dbName: "market-cli-test"
