@@ -70,7 +70,6 @@ func (conf *Config) InitConfig(filePath string) *Config {
 }
 
 // mongodump --uri mongodb+srv://firstUser:<PASSWORD>@cluster0.deeze6y.mongodb.net/<DATABASE>
-// mongodump --uri mongodb+srv://firstUser:qweasd123@cluster0.deeze6y.mongodb.net/market-cli-test
 func exec_shell(command string) {
 	// var once sync.Once
 	// var command string
