@@ -2,3 +2,4 @@ userName: "firstUser"
 clusterUrl: "cluster0.deeze6y.mongodb.net"
 password: ""
 dbName: "xxxdbName"
+concreteTime: "0 3 * * *" #每日的凌晨三点执行备份
