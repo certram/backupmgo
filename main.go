@@ -14,15 +14,19 @@ import (
 
 var (
 	config   Config
-	filePath string = "./config/atlas.yaml"
+	filePath string = "./config/atlas_local.yaml"
 	// 具体备份时间（默认是5个域）；分 时 月的某天 某月 星期几
-	concreteTime string = "15 9 * * *" // 每天的9:15分备份一次
+	concreteTime string // 每天的9:15分备份一次
 )
 
-func main() {
-	// 只读取一次，如果更换了yaml文件，需重新go build
+func init() {
 	config.InitConfig(filePath)
 	fmt.Println("完成读取配置")
+	concreteTime = config.ConcreteTime
+
+}
+
+func main() {
 	// 周期性执行备份操作
 	c := cron.New()
 	command := "mongodump --uri mongodb+srv://" + config.UserName + ":" + config.Password + "@" + config.ClusterUrl + "/" + config.DBName
@@ -43,10 +47,11 @@ func main() {
 }
 
 type Config struct {
-	UserName   string `yaml:"userName"`
-	Password   string `yaml:"password"`
-	ClusterUrl string `yaml:"clusterUrl"`
-	DBName     string `yaml:"dbName"`
+	UserName     string `yaml:"userName"`
+	Password     string `yaml:"password"`
+	ClusterUrl   string `yaml:"clusterUrl"`
+	DBName       string `yaml:"dbName"`
+	ConcreteTime string `yaml:"concreteTime"`
 }
 
 // 读取yaml文件到Config struct
