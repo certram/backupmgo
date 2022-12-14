@@ -1,14 +1,14 @@
 package main
 
 import (
-	"fmt"
+	"errors"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"time"
 
 	"github.com/robfig/cron"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
@@ -20,8 +20,15 @@ var (
 )
 
 func init() {
+	logrus.SetFormatter(&logrus.TextFormatter{})
+	logrus.SetLevel(logrus.InfoLevel)
 	config.InitConfig(filePath)
-	fmt.Println("完成读取配置")
+	err := config.CheckConfig()
+	if err != nil {
+		logrus.Panic("验证配置文件错误")
+	} else {
+		logrus.Info("完成读取配置")
+	}
 	concreteTime = config.ConcreteTime
 
 }
@@ -34,9 +41,9 @@ func main() {
 		// 如果有dump文件夹，则先删除dump文件夹及其包含的所有子目录和所有文件
 		err := os.RemoveAll("./dump/")
 		if err != nil {
-			panic("remove fileFolder failed")
+			logrus.Panic("remove fileFolder failed")
 		}
-		fmt.Println("执行备份")
+
 		time.Sleep(1 * time.Minute)
 		exec_shell(command)
 	})
@@ -58,15 +65,22 @@ type Config struct {
 func (conf *Config) InitConfig(filePath string) *Config {
 	yamlFile, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		log.Printf("get yamlFile err %v ", err)
+		logrus.Errorf("get yamlFile err %v ", err)
 	}
 
 	err = yaml.Unmarshal(yamlFile, conf)
 	if err != nil {
-		log.Fatalf("Unmarshal: %v", err)
+		logrus.Fatalf("Unmarshal: %v", err)
 	}
 	return conf
 
+}
+func (conf *Config) CheckConfig() error {
+	if conf.UserName == "" || conf.Password == "" || conf.ClusterUrl == "" || conf.DBName == "" || conf.ConcreteTime == "" {
+		logrus.Error("please configure the atlas_local.yaml correctly,every field can't be \"\"")
+		return errors.New("config is not right")
+	}
+	return nil
 }
 
 // mongodump --uri mongodb+srv://firstUser:<PASSWORD>@cluster0.deeze6y.mongodb.net/<DATABASE>
@@ -80,7 +94,8 @@ func exec_shell(command string) {
 	cmd := exec.Command("/bin/bash", "-c", command)
 	err := cmd.Run()
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err.Error())
 	}
-	fmt.Printf("backup successfully\n")
+	logrus.Info("backup successfully\n")
+
 }
