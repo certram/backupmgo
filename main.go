@@ -16,7 +16,7 @@ var (
 	config   Config
 	filePath string = "./config/atlas_local.yaml"
 	// 具体备份时间（默认是5个域）；分 时 月的某天 某月 星期几
-	concreteTime string // 每天的9:15分备份一次
+	concreteTime string 
 )
 
 func init() {
